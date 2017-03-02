@@ -66,10 +66,10 @@ parameters:
     value: ""
   - name: HUB_PORT_4444_TCP_ADDR
     description: The Hub to connect to
-    value: ""
+    value: "selenium-hub"
   - name: HUB_PORT_4444_TCP_PORT
     description: The Hub port to connect to
-    value: ""
+    value: "4444"
   - name: REMOTE_HOST
     description: The remote host
     value: ""
