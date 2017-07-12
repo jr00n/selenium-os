@@ -3,8 +3,9 @@ kind: Template
 metadata:
   name: selenium-grid
   annotations:
-    description: "A Selenium Grid"
-    iconClass: "icon-selenium"
+    openshift.io/display-name: "Selenium Grid"
+    description: "A Selenium Grid with FireFox and Chrome nodes"
+    iconClass: "icon-stackoverflow"
     tags: "selenium,grid"
 objects:
 - apiVersion: v1
