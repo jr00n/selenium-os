@@ -101,7 +101,7 @@ objects:
 parameters:
   - name: JAVA_OPTS
     description: Options for the Java command
-    value: "-Xmx512m"
+    value: "-Xmx512m -Dselenium.LOGGER.level=WARNING"
   - name: SE_OPTS
     description: Options for the Node
     value: ""

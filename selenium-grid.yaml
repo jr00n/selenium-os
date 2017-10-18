@@ -146,7 +146,7 @@ objects:
             protocol: TCP
           env:
           - name: JAVA_OPTS
-            value: "-Xmx512m"
+            value: ${JAVA_OPTS}
           - name: SE_OPTS
             value: ''
           - name: HUB_PORT_4444_TCP_ADDR
@@ -245,7 +245,7 @@ objects:
             protocol: TCP
           env:
           - name: JAVA_OPTS
-            value: "-Xmx512m"
+            value: ${JAVA_OPTS}
           - name: SE_OPTS
             value: ''
           - name: HUB_PORT_4444_TCP_ADDR
@@ -279,7 +279,7 @@ objects:
 parameters:
   - name: JAVA_OPTS
     description: Options to pass to the java command
-    value: "-Xmx512m"
+    value: "-Xmx512m -Dselenium.LOGGER.level=WARNING"
   - name: POOL_MAX
     description: Max thread count for incoming and outgoing connections
     value: "30000"
