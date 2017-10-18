@@ -63,7 +63,7 @@ objects:
             value: ${GRID_MAX_SESSION}
           - name: GRID_UNREGISTER_IF_STILL_DOWN_AFTER
             value: ${GRID_UNREGISTER_IF_STILL_DOWN_AFTER}
-          image: selenium/hub
+          image: selenium/hub:3.6.0
           name: master
           ports:
           - containerPort: 4444
@@ -78,45 +78,94 @@ objects:
     to:
       kind: Service
       name: selenium-hub
-- apiVersion: v1
-  kind: DeploymentConfig
+- kind: BuildConfig
+  apiVersion: v1
   metadata:
     name: selenium-node-firefox
   spec:
+    triggers:
+    - type: ConfigChange
+      configChange: {}
+    source:
+      contextDir: selenium-node-firefox
+      type: Git
+      git:
+        uri: https://github.com/jr00n/selenium-os
+        ref: master
+    strategy:
+      type: Docker
+      DockerStrategy: {}
+    output:
+      to:
+        kind: ImageStreamTag
+        name: selenium-node-firefox:latest
+- kind: ImageStream
+  apiVersion: v1
+  metadata:
+    name: selenium-node-firefox
+  spec:
+    dockerImageRepository: ''
+    tags:
+    - name: latest
+- kind: DeploymentConfig
+  apiVersion: v1
+  metadata:
+    name: selenium-node-firefox
+    labels:
+      deploymentConfig: selenium-node-firefox
+  spec:
+    strategy:
+      type: Recreate
+    triggers:
+    - type: ImageChange
+      imageChangeParams:
+        automatic: true
+        containerNames:
+        - selenium-node-firefox
+        from:
+          kind: ImageStreamTag
+          name: selenium-node-firefox:latest
+    - type: ConfigChange
     replicas: 1
     selector:
       browser: firefox
     template:
       metadata:
-        name: selenium-node-firefox-master
         labels:
           browser: firefox
       spec:
         containers:
-        - env:
-          - name: JAVA_OPTS
-            value: -Xmx512m
-          - name: SE_OPTS
-            value: ""
-          - name: HUB_PORT_4444_TCP_ADDR
-            value: "selenium-hub"
-          - name: HUB_PORT_4444_TCP_PORT
-            value: "4444"
-          image: selenium/node-firefox
-          name: master
+        - name: selenium-node-firefox
+          image: selenium-node-firefox
           ports:
-          - containerPort: 4444
+          - name: hub
+            containerPort: 4444
             protocol: TCP
-          - containerPort: 5555
+          - name: node
+            containerPort: 5555
             protocol: TCP
-- apiVersion: v1
-  kind: Service
+          env:
+          - name: JAVA_OPTS
+            value: "-Xmx512m"
+          - name: SE_OPTS
+            value: ''
+          - name: HUB_PORT_4444_TCP_ADDR
+            value: selenium-hub
+          - name: HUB_PORT_4444_TCP_PORT
+            value: '4444'
+          resources: {}
+          terminationMessagePath: "/dev/termination-log"
+          imagePullPolicy: Always
+          securityContext:
+            capabilities: {}
+            privileged: false
+        restartPolicy: Always
+        dnsPolicy: ClusterFirst
+- kind: Service
+  apiVersion: v1
   metadata:
     name: selenium-node-firefox
   spec:
-    selector:
-      browser: firefox
-    type: ClusterIP
     ports:
     - name: node-port
       port: 5555
@@ -126,45 +175,98 @@ objects:
       port: 4444
       targetPort: 4444
       protocol: TCP
-- apiVersion: v1
-  kind: DeploymentConfig
+    selector:
+      browser: firefox
+- kind: BuildConfig
+  apiVersion: v1
   metadata:
     name: selenium-node-chrome
   spec:
+    triggers:
+    - type: ConfigChange
+      configChange: {}
+    source:
+      contextDir: selenium-node-chrome
+      type: Git
+      git:
+        uri: https://github.com/jr00n/selenium-os
+        ref: master
+    strategy:
+      type: Docker
+      DockerStrategy: {}
+    output:
+      to:
+        kind: ImageStreamTag
+        name: selenium-node-chrome:latest
+- kind: ImageStream
+  apiVersion: v1
+  metadata:
+    name: selenium-node-chrome
+  spec:
+    dockerImageRepository: ''
+    tags:
+    - name: latest
+- kind: DeploymentConfig
+  apiVersion: v1
+  metadata:
+    name: selenium-node-chrome
+    labels:
+      deploymentConfig: selenium-node-chrome
+  spec:
+    strategy:
+      type: Recreate
+    triggers:
+    - type: ImageChange
+      imageChangeParams:
+        automatic: true
+        containerNames:
+        - selenium-node-chrome
+        from:
+          kind: ImageStreamTag
+          name: selenium-node-chrome:latest
+    - type: ConfigChange
     replicas: 1
     selector:
       browser: chrome
     template:
       metadata:
-        name: selenium-node-chrome-master
         labels:
           browser: chrome
       spec:
         containers:
-        - env:
-          - name: JAVA_OPTS
-            value: -Xmx512m
-          - name: SE_OPTS
-            value: ""
-          - name: HUB_PORT_4444_TCP_ADDR
-            value: "selenium-hub"
-          - name: HUB_PORT_4444_TCP_PORT
-            value: "4444"
-          image: selenium/node-chrome
-          name: master
+        - name: selenium-node-chrome
+          image: selenium-node-chrome
           ports:
-          - containerPort: 4444
+          - name: hub
+            containerPort: 4444
             protocol: TCP
-          - containerPort: 5555
+          - name: node
+            containerPort: 5555
             protocol: TCP
-- apiVersion: v1
-  kind: Service
+          env:
+          - name: JAVA_OPTS
+            value: "-Xmx512m"
+          - name: SE_OPTS
+            value: ''
+          - name: HUB_PORT_4444_TCP_ADDR
+            value: selenium-hub
+          - name: HUB_PORT_4444_TCP_PORT
+            value: '4444'
+          resources: {}
+          terminationMessagePath: "/dev/termination-log"
+          imagePullPolicy: Always
+          securityContext:
+            capabilities: {}
+            privileged: false
+        restartPolicy: Always
+        dnsPolicy: ClusterFirst
+- kind: Service
+  apiVersion: v1
   metadata:
     name: selenium-node-chrome
   spec:
     selector:
       browser: chrome
-    type: ClusterIP
     ports:
     - name: node-port
       port: 5555
@@ -206,4 +308,4 @@ parameters:
     description: Time to wait before unregistering nodes
     value: "500"
 labels:
-  maintainer: jos
+  app: selenium-grid

@@ -1,4 +1,4 @@
-FROM selenium/node-firefox:latest
+FROM selenium/node-firefox:3.6.0
 
 ENV HOME=/home/seluser
 
